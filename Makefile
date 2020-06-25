@@ -6,9 +6,8 @@ all: lint test
 
 .PHONY: test
 test:
-	for p in $(PACKAGES); do \
-		(cd $$p && go test -v .); \
-	done
+	cd test-mountinfo && go test -v .
+	cd test-mount && go test -v .
 
 .PHONY: lint
 lint: $(BINDIR)/golangci-lint
