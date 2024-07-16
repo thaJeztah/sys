@@ -1,3 +1,6 @@
+// Package userns provides utilities to detect whether we are currently running
+// in a Linux user namespace.
+
 package userns
 
 // RunningInUserNS detects whether we are currently running in a Linux
