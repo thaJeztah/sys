@@ -456,12 +456,35 @@ func GetExecUser(userSpec string, defaults *ExecUser, passwd, group io.Reader) (
 // or the given group data is nil, the id will be returned as-is
 // provided it is in the legal range.
 func GetAdditionalGroups(additionalGroups []string, group io.Reader) ([]int, error) {
+	type groupArg struct {
+		name      string
+		gid       int
+		isNumeric bool
+	}
+
+	addtlGroups := make([]groupArg, len(additionalGroups))
+	for i, ag := range additionalGroups {
+		gid, ok, err := parseNumeric(ag)
+		if err != nil {
+			return nil, err
+		}
+		addtlGroups[i] = groupArg{
+			name:      ag,
+			gid:       gid,
+			isNumeric: ok,
+		}
+	}
+
 	groups := []Group{}
 	if group != nil {
 		var err error
 		groups, err = ParseGroupFilter(group, func(g Group) bool {
-			for _, ag := range additionalGroups {
-				if g.Name == ag || strconv.Itoa(g.Gid) == ag {
+			for _, ag := range addtlGroups {
+				if ag.isNumeric {
+					if g.Gid == ag.gid {
+						return true
+					}
+				} else if g.Name == ag.name {
 					return true
 				}
 			}
@@ -473,32 +496,34 @@ func GetAdditionalGroups(additionalGroups []string, group io.Reader) ([]int, err
 	}
 
 	gidMap := make(map[int]struct{})
-	for _, ag := range additionalGroups {
+	for _, ag := range addtlGroups {
 		var found bool
 		for _, g := range groups {
 			// if we found a matched group either by name or gid, take the
 			// first matched as correct
-			if g.Name == ag || strconv.Itoa(g.Gid) == ag {
-				if _, ok := gidMap[g.Gid]; !ok {
-					gidMap[g.Gid] = struct{}{}
-					found = true
-					break
+			if ag.isNumeric {
+				if g.Gid != ag.gid {
+					continue
 				}
+			} else if g.Name != ag.name {
+				continue
 			}
+
+			if g.Gid < minID || g.Gid > maxID {
+				return nil, ErrRange
+			}
+			gidMap[g.Gid] = struct{}{}
+			found = true
+			break
 		}
 		// we asked for a group but didn't find it. let's check to see
 		// if we wanted a numeric group
 		if !found {
-			gid, err := strconv.ParseInt(ag, 10, 64)
-			if err != nil {
+			if !ag.isNumeric {
 				// Not a numeric ID either.
-				return nil, fmt.Errorf("unable to find group %s: %w", ag, ErrNoGroupEntries)
+				return nil, fmt.Errorf("unable to find group %s: %w", ag.name, ErrNoGroupEntries)
 			}
-			// Ensure gid is inside gid range.
-			if gid < minID || gid > maxID {
-				return nil, ErrRange
-			}
-			gidMap[int(gid)] = struct{}{}
+			gidMap[ag.gid] = struct{}{}
 		}
 	}
 	gids := []int{}
