@@ -31,12 +31,7 @@ func WithOnlyNew(o *mkdirOptions) {
 // reapplies the requested permission bits after creation, so the resulting
 // permissions are not affected by the process umask.
 func MkdirAllAndChown(path string, mode os.FileMode, uid, gid int, opts ...MkdirOpt) error {
-	var options mkdirOptions
-	for _, opt := range opts {
-		opt(&options)
-	}
-
-	return mkdirAs(path, mode, uid, gid, true, options.onlyNew)
+	return mkdirAs(path, mode, uid, gid, true, opts...)
 }
 
 // MkdirAndChown creates a directory named path and applies the requested
@@ -49,11 +44,7 @@ func MkdirAllAndChown(path string, mode os.FileMode, uid, gid int, opts ...Mkdir
 // exists as a directory. The resulting permission bits are not affected by
 // the process umask.
 func MkdirAndChown(path string, mode os.FileMode, uid, gid int, opts ...MkdirOpt) error {
-	var options mkdirOptions
-	for _, opt := range opts {
-		opt(&options)
-	}
-	return mkdirAs(path, mode, uid, gid, false, options.onlyNew)
+	return mkdirAs(path, mode, uid, gid, false, opts...)
 }
 
 // getRootUIDGID retrieves the remapped root uid/gid pair from the set of maps.
