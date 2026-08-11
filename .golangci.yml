@@ -18,7 +18,6 @@ linters:
         - assignOp
         - builtinShadow
         - deferInLoop
-        - emptyStringTest
         - hugeParam
         - ifElseChain
         - importShadow
