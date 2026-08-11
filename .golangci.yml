@@ -19,7 +19,6 @@ linters:
         - builtinShadow
         - deferInLoop
         - hugeParam
-        - ifElseChain
         - importShadow
         - paramTypeCombine
         - rangeValCopy
