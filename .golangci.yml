@@ -25,7 +25,6 @@ linters:
         - rangeValCopy
         - sloppyReassign
         - unnamedResult
-        - unnecessaryDefer
         - whyNoLint
       enable-all: true
     staticcheck:
