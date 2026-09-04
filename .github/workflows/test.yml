@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         go-version: [1.18.x, oldstable, stable]
-        platform: [ubuntu-22.04, ubuntu-24.04, windows-2022, windows-2025, macos-15, macos-26]
+        platform: [ubuntu-22.04, ubuntu-24.04, ubuntu-26.04, windows-2022, windows-2025, macos-15, macos-26]
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 10 # guardrails timeout for the whole job
     defaults:
@@ -28,9 +28,11 @@ jobs:
         shell: bash
     steps:
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
     - name: Install Go
-      uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version: ${{ matrix.go-version }}
         # Disable caching as we don't have top-level go.sum needed for
@@ -87,7 +89,7 @@ jobs:
         uname -a
         make test
     - name: Send to Codecov
-      uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5.5.3
+      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}  # used to upload coverage reports: https://github.com/moby/buildkit/pull/4660#issue-2142122533
 
@@ -95,6 +97,23 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10 # guardrails timeout for the whole job
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - run: pip install --break-system-packages codespell==v2.3.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - run: pip install --break-system-packages codespell==v2.4.3
     - run: codespell
+
+  zizmor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10 # guardrails timeout for the whole job
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
+      with:
+        # Report findings as workflow annotations rather than uploading
+        # them to the repository's security tab (which needs additional
+        # permissions and GitHub Advanced Security to be enabled).
+        advanced-security: false
+        annotations: true
