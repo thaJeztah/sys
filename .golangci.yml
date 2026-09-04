@@ -13,17 +13,6 @@ linters:
       - std-error-handling
   settings:
     gocritic:
-      disabled-checks:
-        - appendAssign
-        - builtinShadow
-        - deferInLoop
-        - hugeParam
-        - importShadow
-        - paramTypeCombine
-        - rangeValCopy
-        - sloppyReassign
-        - unnamedResult
-        - whyNoLint
       enable-all: true
     staticcheck:
       # Enable all options, with some exceptions.
